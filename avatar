@@ -14,8 +14,8 @@ MOUNT_FS=/dev/vda1
 MOUNT_DIR=$HOME_DIR/temp
 
 cd $MOD_DIR
-#make clean
-#make -j 16
+make clean
+make -j 16
 
 set +x
 if [ ! -d $MOUNT_DIR ]; then
@@ -45,8 +45,9 @@ lsmod | grep $MOD_NAME
 dividor
 
 # add new module
-echo "insmod $MOD_DIR/$MOD_NAME.ko"
+echo "insmod $MOD_DIR/$MOD_NAME.ko && lsmod $MOD_NAME"
 insmod $MOD_DIR/$MOD_NAME.ko
+lsmod | grep $MOD_NAME
 dividor
 
 # mount with new module
