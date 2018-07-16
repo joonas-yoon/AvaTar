@@ -37,6 +37,9 @@
 #include <linux/compat.h>
 #endif
 
+#define EXT4KFS_AVATAR
+// #undef EXT4KFS_AVATAR
+
 #define EXT4KFS_DEBUG 1
 
 #if EXT4KFS_DEBUG
@@ -629,6 +632,9 @@ enum {
 #define EXT4_IOC_SET_ENCRYPTION_POLICY	_IOR('f', 19, struct ext4_encryption_policy)
 #define EXT4_IOC_GET_ENCRYPTION_PWSALT	_IOW('f', 20, __u8[16])
 #define EXT4_IOC_GET_ENCRYPTION_POLICY	_IOW('f', 21, struct ext4_encryption_policy)
+#ifdef EXT4KFS_AVATAR
+#define EXT4_IOC_EXT4K_READ		_IOW('f', 22, long)
+#endif
 
 #if defined(__KERNEL__) && defined(CONFIG_COMPAT)
 /*
