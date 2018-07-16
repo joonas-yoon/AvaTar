@@ -37,6 +37,20 @@
 #include <linux/compat.h>
 #endif
 
+#define EXT4KFS_DEBUG 1
+
+#if EXT4KFS_DEBUG
+#define ext4k_debug(f, a...)						\
+	do {								\
+		printk(KERN_DEBUG "\nEXT4K-fs DEBUG (%s, %d): %s:\n",	\
+			__FILE__, __LINE__, __func__);			\
+		printk(KERN_DEBUG f, ## a);				\
+	} while (0)
+#else
+#define ext4k_debug(fmt, ...)	no_printk(fmt, ##__VA_ARGS__)
+#endif
+
+
 /*
  * The fourth extended filesystem constants/structures
  */
