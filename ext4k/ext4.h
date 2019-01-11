@@ -42,6 +42,15 @@
 
 #define EXT4KFS_DEBUG 1
 
+#ifdef EXT4KFS_AVATAR	
+#define EXT4_IOC_SPLIT 7777	//hcpark
+#define EXT4_IOC_MERGE 7778	//hcpark
+
+int ext4k_split(struct file *filp, unsigned long arg);
+int ext4k_merge(struct file *filp, unsigned long arg);
+
+#endif
+
 #if EXT4KFS_DEBUG
 #define ext4k_debug(f, a...)						\
 	do {								\
@@ -61,7 +70,8 @@
 /*
  * Define EXT4FS_DEBUG to produce debug messages
  */
-#undef EXT4FS_DEBUG
+//#undef EXT4FS_DEBUG
+#define EXT4FS_DEBUG	//hcpark
 
 /*
  * Debug code
