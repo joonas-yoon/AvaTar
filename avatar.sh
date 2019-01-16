@@ -10,7 +10,7 @@ set -ex
 HOME_DIR=`pwd`
 MOD_NAME=ext4k
 MOD_DIR=$HOME_DIR/$MOD_NAME
-MOUNT_FS=$HOME_DIR/ramdisk/image
+MOUNT_FS=/mnt/ramdisk/ext4.image
 MOUNT_DIR=$HOME_DIR/myfs
 
 cd $MOD_DIR
