@@ -27,24 +27,25 @@ int main(int argc, char* argv[]) {
     }
 
     error = ioctl(fd, EXT4_IOC_SPLIT, 2);
-    error = ioctl(fd, EXT4_IOC_MERGE, 2);
-    
     //error = ioctl(fd, EXT4_IOC_GETFLAGS, &buf);
     //error = ioctl(fd, EXT4_IOC_GETVERSION, &tmp);
 
     if(error < 0) {
-        perror("ioctl");
+        perror("ioctl::EXT4_IOC_SPLIT");
         exit(1);
     }
 
     printf("buf : %d tmp : %d \n", buf, tmp);
 
    // error = ioctl(fd, EXT4_IOC_EXT4K_READ, &tmp);
+    error = ioctl(fd, EXT4_IOC_MERGE, 2);
 
     if(error < 0) {
-        perror("ioctl::EXT4K_TEST");
+        perror("ioctl::EXT4_IOC_MERGE");
         exit(1);
     }
+
+    printf("buf : %d tmp : %d \n", buf, tmp);
 
     close(fd);
 
