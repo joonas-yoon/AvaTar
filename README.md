@@ -22,5 +22,5 @@ $ tail -f /var/log/kern.log
 OR
 
 ```
-$ watch 'dmesg -c'
+$ dmesg -c
 ```
