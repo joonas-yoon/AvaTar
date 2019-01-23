@@ -11,7 +11,7 @@ HOME_DIR=`pwd`
 MOD_NAME=ext4k
 MOD_DIR=$HOME_DIR/$MOD_NAME
 MOUNT_FS=/mnt/ramdisk/ext4.image
-MOUNT_DIR=$HOME_DIR/myfs
+MOUNT_DIR=$HOME_DIR/fs
 
 cd $MOD_DIR
 make clean
