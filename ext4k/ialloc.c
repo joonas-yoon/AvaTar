@@ -762,6 +762,8 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 	if (!dir || !dir->i_nlink)
 		return ERR_PTR(-EPERM);
 
+	ext4k_debug("[directory] superblock: %s, inode: %lu", dir->i_sb->s_id, dir->i_ino);
+
 	if ((ext4_encrypted_inode(dir) ||
 	     DUMMY_ENCRYPTION_ENABLED(EXT4_SB(dir->i_sb))) &&
 	    (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode))) {
@@ -783,6 +785,8 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 		return ERR_PTR(-ENOMEM);
 	ei = EXT4_I(inode);
 	sbi = EXT4_SB(sb);
+
+	ext4k_debug(">> [new_inode]");
 
 	/*
 	 * Initalize owners and quota early so that we don't have to account
@@ -806,6 +810,8 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 	if (!goal)
 		goal = sbi->s_inode_goal;
 
+	ext4k_debug(">> [initialize owners and quota]\nowner = {%u, %u}\ngoal = %u", owner[0], owner[1], goal);
+
 	if (goal && goal <= le32_to_cpu(sbi->s_es->s_inodes_count)) {
 		group = (goal - 1) / EXT4_INODES_PER_GROUP(sb);
 		ino = (goal - 1) % EXT4_INODES_PER_GROUP(sb);
@@ -819,6 +825,8 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 		ret2 = find_group_other(sb, dir, &group, mode);
 
 got_group:
+	ext4k_debug("[got_group]");
+
 	EXT4_I(dir)->i_last_alloc_group = group;
 	err = -ENOSPC;
 	if (ret2 == -1)
@@ -865,6 +873,8 @@ got_group:
 		}
 
 repeat_in_this_group:
+		ext4k_debug("[repeat_in_this_group]");
+
 		ino = ext4_find_next_zero_bit((unsigned long *)
 					      inode_bitmap_bh->b_data,
 					      EXT4_INODES_PER_GROUP(sb), ino);
@@ -904,9 +914,11 @@ repeat_in_this_group:
 		if (!ret2)
 			goto got; /* we grabbed the inode! */
 next_inode:
+		ext4k_debug("[next_inode]");
 		if (ino < EXT4_INODES_PER_GROUP(sb))
 			goto repeat_in_this_group;
 next_group:
+		ext4k_debug("[next_group]");
 		if (++group == ngroups)
 			group = 0;
 	}
@@ -914,6 +926,7 @@ next_group:
 	goto out;
 
 got:
+	ext4k_debug("[got]");
 	BUFFER_TRACE(inode_bitmap_bh, "call ext4_handle_dirty_metadata");
 	err = ext4_handle_dirty_metadata(handle, NULL, inode_bitmap_bh);
 	if (err) {
@@ -994,6 +1007,8 @@ got:
 		ext4_lock_group(sb, group);
 	}
 
+	ext4k_debug(">> [ext4_has_group_desc_csum]");
+
 	ext4_free_inodes_set(sb, gdp, ext4_free_inodes_count(sb, gdp) - 1);
 	if (S_ISDIR(mode)) {
 		ext4_used_dirs_set(sb, gdp, ext4_used_dirs_count(sb, gdp) + 1);
@@ -1009,6 +1024,8 @@ got:
 		ext4_group_desc_csum_set(sb, group, gdp);
 	}
 	ext4_unlock_group(sb, group);
+
+	ext4k_debug(">> [ext4_free_inodes_set, ext4_unlock_group]");
 
 	BUFFER_TRACE(group_desc_bh, "call ext4_handle_dirty_metadata");
 	err = ext4_handle_dirty_metadata(handle, NULL, group_desc_bh);
@@ -1027,10 +1044,13 @@ got:
 	}
 
 	inode->i_ino = ino + group * EXT4_INODES_PER_GROUP(sb);
+	ext4k_debug("inode->i_ino = %lu + %lu * %lu", ino, group, EXT4_INODES_PER_GROUP(sb));
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ei->i_crtime =
 						       ext4_current_time(inode);
+
+	ext4k_debug(">> [ext4_free_inodes_set, ext4_unlock_group]");
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;
@@ -1045,6 +1065,7 @@ got:
 	ei->i_last_alloc_group = ~0;
 
 	ext4_set_inode_flags(inode);
+	ext4k_debug(">> [ext4_set_inode_flags]");
 	if (IS_DIRSYNC(inode))
 		ext4_handle_sync(handle);
 	if (insert_inode_locked(inode) < 0) {
@@ -1060,6 +1081,7 @@ got:
 	spin_lock(&sbi->s_next_gen_lock);
 	inode->i_generation = sbi->s_next_generation++;
 	spin_unlock(&sbi->s_next_gen_lock);
+	ext4k_debug(">> [update inode->i_generation]");
 
 	/* Precompute checksum seed for inode metadata */
 	if (ext4_has_metadata_csum(sb)) {
@@ -1071,9 +1093,11 @@ got:
 		ei->i_csum_seed = ext4_chksum(sbi, csum, (__u8 *)&gen,
 					      sizeof(gen));
 	}
+	ext4k_debug(">> [ext4_has_metadata_csum]");
 
 	ext4_clear_state_flags(ei); /* Only relevant on 32-bit archs */
 	ext4_set_inode_state(inode, EXT4_STATE_NEW);
+	ext4k_debug(">> [ext4_set_inode_state]");
 
 	ei->i_extra_isize = EXT4_SB(sb)->s_want_extra_isize;
 	ei->i_inline_off = 0;
@@ -1091,6 +1115,8 @@ got:
 	err = ext4_init_security(handle, inode, dir, qstr);
 	if (err)
 		goto fail_free_drop;
+
+	ext4k_debug(">> [dquot_alloc_inode, ext4_init_acl, ext4_init_security]");
 
 	if (ext4_has_feature_extents(sb)) {
 		/* set extent flag only for directory, file and normal symlink*/
@@ -1123,17 +1149,21 @@ got:
 	return ret;
 
 fail_free_drop:
+	ext4k_debug("[fail_free_drop]");
 	dquot_free_inode(inode);
 fail_drop:
+	ext4k_debug("[fail_drop]");
 	clear_nlink(inode);
 	unlock_new_inode(inode);
 out:
+	ext4k_debug("[out]");
 	dquot_drop(inode);
 	inode->i_flags |= S_NOQUOTA;
 	iput(inode);
 	brelse(inode_bitmap_bh);
 	return ERR_PTR(err);
 }
+
 
 /* Verify that we are loading a valid orphan from disk */
 struct inode *ext4_orphan_get(struct super_block *sb, unsigned long ino)
