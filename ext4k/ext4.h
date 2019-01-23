@@ -54,9 +54,10 @@ int ext4k_merge(struct file *filp, unsigned long arg);
 #if EXT4KFS_DEBUG
 #define ext4k_debug(f, a...)						\
 	do {								\
-		printk(KERN_DEBUG "\nEXT4K-fs DEBUG (%s, %d): %s:\n",	\
+		printk(KERN_DEBUG "EXT4K-fs DEBUG (%s, %d): %s:\n",	\
 			__FILE__, __LINE__, __func__);			\
 		printk(KERN_DEBUG f, ## a);				\
+		printk(KERN_DEBUG "\n");				\
 	} while (0)
 #else
 #define ext4k_debug(fmt, ...)	no_printk(fmt, ##__VA_ARGS__)

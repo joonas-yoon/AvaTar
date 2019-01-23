@@ -95,6 +95,7 @@ x509.genkey
 
 # temporary directory
 temp/
+fs/
 
 # linux images
 linux-4.4/
