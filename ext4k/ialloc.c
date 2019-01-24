@@ -810,7 +810,11 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 	if (!goal)
 		goal = sbi->s_inode_goal;
 
-	ext4k_debug(">> [initialize owners and quota]\nowner = {%u, %u}\ngoal = %u", owner[0], owner[1], goal);
+	ext4k_debug(">> [initialize owners and quota]");
+	if(owner){
+		ext4k_debug("owner = {%u, %u}", owner[0], owner[1]);
+	}
+	ext4k_debug("goal = %u", goal);
 
 	if (goal && goal <= le32_to_cpu(sbi->s_es->s_inodes_count)) {
 		group = (goal - 1) / EXT4_INODES_PER_GROUP(sb);
@@ -818,6 +822,8 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 		ret2 = 0;
 		goto got_group;
 	}
+	
+	ext4k_debug("nothing changed on goal");
 
 	if (S_ISDIR(mode))
 		ret2 = find_group_orlov(sb, dir, &group, mode, qstr);

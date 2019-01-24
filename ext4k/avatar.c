@@ -38,8 +38,8 @@ int ext4k_split(struct file *filp, unsigned long arg) {
 
 	ext4k_debug("d_inode->i_ino = %lu", dinode->i_ino);
 
-//	tmp_inode = ext4_new_inode(handle, dinode,
-//					S_IFREG, NULL, goal, owner);
+	tmp_inode = ext4_new_inode(handle, dinode,
+					S_IFREG, NULL, goal, owner);
 
 	if (IS_ERR(tmp_inode)) {
 		retval = PTR_ERR(tmp_inode);
